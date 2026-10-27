@@ -203,3 +203,4 @@ Requires header: `X-API-KEY: <key>` (or falls back to IP limit)
 
 ## 📄 License
 MIT License. Developed for technical evaluation by MystartupTV Team.
+

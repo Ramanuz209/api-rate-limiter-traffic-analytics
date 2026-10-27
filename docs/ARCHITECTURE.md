@@ -154,3 +154,4 @@ To ensure analytics collection does not bottleneck API throughput:
 2. **In-Memory Ring-Buffer**: Keeps the latest 100 requests in an active memory buffer for sub-millisecond dashboard updates.
 3. **Batch DB Flushes**: Database writes are queued and flushed in periodic batches every 1.5 seconds, drastically reducing SQL IOPS.
 4. **API Key Cache**: API key metadata is cached in-memory with a 30-second TTL to avoid database reads on every incoming API call.
+

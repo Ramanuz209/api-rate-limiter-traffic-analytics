@@ -62,3 +62,4 @@ export default function StatusPieChart({ data }) {
     </div>
   );
 }
+
