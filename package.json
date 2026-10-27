@@ -1,0 +1,27 @@
+{
+  "name": "api-rate-limiting-traffic-analytics-platform",
+  "version": "1.0.0",
+  "description": "Enterprise-grade API Rate Limiting and Traffic Analytics Platform with Sliding Window Redis Lua Scripting, React Dashboard, and Multi-database Support.",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm run build",
+    "start": "node backend/src/server.js",
+    "test": "cd backend && npm test",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev"
+  },
+  "keywords": [
+    "rate-limiter",
+    "redis",
+    "sliding-window",
+    "traffic-analytics",
+    "express",
+    "react",
+    "recharts",
+    "mysql",
+    "postgresql",
+    "render"
+  ],
+  "author": "",
+  "license": "MIT"
+}

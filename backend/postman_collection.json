@@ -1,0 +1,113 @@
+{
+  "info": {
+    "_postman_id": "c1f7a29e-2139-44d8-9b88-rate-limiter-suite",
+    "name": "API Rate Limiting & Traffic Analytics Platform",
+    "description": "Comprehensive Postman test collection for the Rate Limiting and Traffic Analytics Platform.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000", "type": "string" },
+    { "key": "enterpriseKey", "value": "key_enterprise_live_9999", "type": "string" },
+    { "key": "standardKey", "value": "key_standard_live_5555", "type": "string" },
+    { "key": "freeKey", "value": "key_free_live_1111", "type": "string" },
+    { "key": "strictBurstKey", "value": "key_strict_live_0005", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Health & Engine Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/health", "host": ["{{baseUrl}}"], "path": ["api", "health"] }
+      }
+    },
+    {
+      "name": "2. Protected API - Enterprise Key (High Quota 200/min)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "X-API-KEY", "value": "{{enterpriseKey}}", "type": "text" }],
+        "url": { "raw": "{{baseUrl}}/api/v1/data", "host": ["{{baseUrl}}"], "path": ["api", "v1", "data"] }
+      }
+    },
+    {
+      "name": "3. Protected API - Free Tier Key (20/min limit)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "X-API-KEY", "value": "{{freeKey}}", "type": "text" }],
+        "url": { "raw": "{{baseUrl}}/api/v1/data", "host": ["{{baseUrl}}"], "path": ["api", "v1", "data"] }
+      }
+    },
+    {
+      "name": "4. Protected API - Strict Burst Key (5 reqs / 10s - Test 429)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "X-API-KEY", "value": "{{strictBurstKey}}", "type": "text" }],
+        "url": { "raw": "{{baseUrl}}/api/v1/data", "host": ["{{baseUrl}}"], "path": ["api", "v1", "data"] }
+      }
+    },
+    {
+      "name": "5. Protected API - Anonymous IP Fallback (No Key)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/v1/data", "host": ["{{baseUrl}}"], "path": ["api", "v1", "data"] }
+      }
+    },
+    {
+      "name": "6. Protected API - Invalid Key (Expect 401 Unauthorized)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "X-API-KEY", "value": "invalid_unregistered_key", "type": "text" }],
+        "url": { "raw": "{{baseUrl}}/api/v1/data", "host": ["{{baseUrl}}"], "path": ["api", "v1", "data"] }
+      }
+    },
+    {
+      "name": "7. Analytics - Real-time Overview Metrics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/analytics/overview?timeframe=60", "host": ["{{baseUrl}}"], "path": ["api", "analytics", "overview"], "query": [{ "key": "timeframe", "value": "60" }] }
+      }
+    },
+    {
+      "name": "8. Analytics - Time Series Traffic Data",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/analytics/traffic?minutes=30", "host": ["{{baseUrl}}"], "path": ["api", "analytics", "traffic"], "query": [{ "key": "minutes", "value": "30" }] }
+      }
+    },
+    {
+      "name": "9. Analytics - Status Code Distribution",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/analytics/status-distribution", "host": ["{{baseUrl}}"], "path": ["api", "analytics", "status-distribution"] }
+      }
+    },
+    {
+      "name": "10. Analytics - Client Usage Breakdown",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/analytics/clients", "host": ["{{baseUrl}}"], "path": ["api", "analytics", "clients"] }
+      }
+    },
+    {
+      "name": "11. Policies - List Configured Rate Limit Policies",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/policies", "host": ["{{baseUrl}}"], "path": ["api", "policies"] }
+      }
+    },
+    {
+      "name": "12. Clients - List All Registered Clients",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/clients", "host": ["{{baseUrl}}"], "path": ["api", "clients"] }
+      }
+    }
+  ]
+}
