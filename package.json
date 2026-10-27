@@ -7,6 +7,7 @@
     "build": "cd backend && npm install && cd ../frontend && npm install && npm run build",
     "install:all": "cd backend && npm install && cd ../frontend && npm install",
     "start": "node backend/src/server.js",
+    "dev": "node scripts/dev.js",
     "test": "cd backend && npm test",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev"
