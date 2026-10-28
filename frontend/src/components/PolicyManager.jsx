@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Key, Plus, Check, Power, RefreshCw, Copy } from 'lucide-react';
+import { Shield, Key, Plus, Check, Power, Copy, Code2, Play, Terminal, X, ExternalLink } from 'lucide-react';
 import { api } from '../services/api';
 
-export default function PolicyManager({ onUpdate }) {
+export default function PolicyManager({ onUpdate, onTestKey }) {
   const [policies, setPolicies] = useState([]);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copiedKey, setCopiedKey] = useState(null);
+
+  // Snippet Modal State
+  const [selectedSnippetClient, setSelectedSnippetClient] = useState(null);
 
   // New Policy Form State
   const [showPolicyModal, setShowPolicyModal] = useState(false);
@@ -156,13 +159,13 @@ export default function PolicyManager({ onUpdate }) {
 
       {/* 2. Registered Clients & API Keys */}
       <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur shadow-xl">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           <div>
             <h3 className="text-lg font-bold text-white flex items-center space-x-2">
               <Key className="h-5 w-5 text-indigo-400" />
               <span>Registered Clients & Active API Keys</span>
             </h3>
-            <p className="text-xs text-slate-400">Manage client tiers and cryptographic API tokens</p>
+            <p className="text-xs text-slate-400">Manage client tiers, cryptographic API tokens, and access</p>
           </div>
           <button
             onClick={() => setShowClientModal(true)}
@@ -171,6 +174,18 @@ export default function PolicyManager({ onUpdate }) {
             <Plus className="h-4 w-4" />
             <span>Add Client</span>
           </button>
+        </div>
+
+        {/* Quick Helper Banner */}
+        <div className="mb-6 p-4 rounded-xl bg-sky-950/20 border border-sky-500/20 text-xs text-slate-300 flex items-start space-x-3">
+          <Terminal className="h-4 w-4 text-sky-400 flex-shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <span className="font-semibold text-sky-300">How to use these API keys:</span>
+            <p className="text-slate-400 leading-relaxed">
+              External apps, mobile clients, and developers include their key in the HTTP header <code className="text-sky-300 bg-slate-900 px-1.5 py-0.5 rounded font-mono">X-API-KEY: key_...</code>. 
+              Click <strong>"Test in Simulator"</strong> on any row to test rate limiting immediately, or click the <strong>Code ({"</>"})</strong> button to get ready-to-use cURL, JavaScript, and Python snippets.
+            </p>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -231,19 +246,43 @@ export default function PolicyManager({ onUpdate }) {
                       )}
                     </td>
                     <td className="py-3 px-4 text-right">
-                      {primaryKey && (
-                        <button
-                          onClick={() => handleToggleKey(primaryKey.id)}
-                          className={`p-1.5 rounded-lg border transition ${
-                            primaryKey.isActive
-                              ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20'
-                              : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
-                          }`}
-                          title={primaryKey.isActive ? 'Disable API Key' : 'Enable API Key'}
-                        >
-                          <Power className="h-3.5 w-3.5" />
-                        </button>
-                      )}
+                      <div className="flex items-center justify-end space-x-2">
+                        {primaryKey && (
+                          <>
+                            {/* Test Key in Simulator Button */}
+                            <button
+                              onClick={() => onTestKey && onTestKey(primaryKey.key)}
+                              className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 text-[11px] font-sans font-medium transition"
+                              title="Test this key in Live Simulator"
+                            >
+                              <Play className="h-3 w-3 fill-sky-400" />
+                              <span>Test</span>
+                            </button>
+
+                            {/* View Code Snippets Button */}
+                            <button
+                              onClick={() => setSelectedSnippetClient({ client: c, key: primaryKey })}
+                              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
+                              title="View Code Snippets (cURL, JS, Python)"
+                            >
+                              <Code2 className="h-3.5 w-3.5" />
+                            </button>
+
+                            {/* Enable / Disable Key Button */}
+                            <button
+                              onClick={() => handleToggleKey(primaryKey.id)}
+                              className={`p-1.5 rounded-lg border transition ${
+                                primaryKey.isActive
+                                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20'
+                                  : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                              }`}
+                              title={primaryKey.isActive ? 'Disable API Key (Revoke Access)' : 'Enable API Key'}
+                            >
+                              <Power className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -252,6 +291,96 @@ export default function PolicyManager({ onUpdate }) {
           </table>
         </div>
       </div>
+
+      {/* Code Snippets Modal */}
+      {selectedSnippetClient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-slate-800">
+              <div className="flex items-center space-x-2">
+                <Code2 className="h-5 w-5 text-indigo-400" />
+                <h3 className="text-base font-bold text-white">
+                  Integration Code: {selectedSnippetClient.client.name}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedSnippetClient(null)}
+                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5 text-xs">
+              <div>
+                <label className="block text-slate-400 font-semibold uppercase tracking-wider text-[11px] mb-2">
+                  1. cURL (Terminal / Command Prompt)
+                </label>
+                <div className="relative bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-slate-200 overflow-x-auto">
+                  <code>curl -i -H "X-API-KEY: {selectedSnippetClient.key.key}" http://localhost:5000/api/v1/data</code>
+                  <button
+                    onClick={() => handleCopy(`curl -i -H "X-API-KEY: ${selectedSnippetClient.key.key}" http://localhost:5000/api/v1/data`)}
+                    className="absolute right-2 top-2 p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                    title="Copy cURL"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 font-semibold uppercase tracking-wider text-[11px] mb-2">
+                  2. JavaScript / Node.js (Fetch API)
+                </label>
+                <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-slate-200 overflow-x-auto">
+                  <pre>{`fetch('http://localhost:5000/api/v1/data', {
+  headers: {
+    'X-API-KEY': '${selectedSnippetClient.key.key}'
+  }
+})
+.then(res => res.json())
+.then(data => console.log(data));`}</pre>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 font-semibold uppercase tracking-wider text-[11px] mb-2">
+                  3. Python (Requests Library)
+                </label>
+                <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-slate-200 overflow-x-auto">
+                  <pre>{`import requests
+
+url = "http://localhost:5000/api/v1/data"
+headers = {"X-API-KEY": "${selectedSnippetClient.key.key}"}
+
+response = requests.get(url, headers=headers)
+print(response.status_code, response.json())`}</pre>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-slate-950/60 border-t border-slate-800">
+              <span className="text-[11px] text-slate-400 font-mono">
+                Assigned Quota: {selectedSnippetClient.client.tier.toUpperCase()} Tier
+              </span>
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const keyStr = selectedSnippetClient.key.key;
+                    setSelectedSnippetClient(null);
+                    if (onTestKey) onTestKey(keyStr);
+                  }}
+                  className="flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-sky-500 hover:bg-sky-400 text-white shadow-md shadow-sky-500/20"
+                >
+                  <Play className="h-3.5 w-3.5 fill-white" />
+                  <span>Test in Live Simulator</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Create Policy Modal */}
       {showPolicyModal && (
@@ -387,4 +516,3 @@ export default function PolicyManager({ onUpdate }) {
     </div>
   );
 }
-

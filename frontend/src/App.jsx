@@ -13,6 +13,12 @@ import { api } from './services/api';
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [simulatorKey, setSimulatorKey] = useState(null);
+
+  const handleTestKeyInSimulator = (keyString) => {
+    setSimulatorKey(keyString);
+    setActiveTab('simulator');
+  };
 
   // Data states
   const [health, setHealth] = useState(null);
@@ -109,12 +115,12 @@ export default function App() {
 
         {/* TAB 2: LIVE API SIMULATOR */}
         {activeTab === 'simulator' && (
-          <ApiSimulator onTrafficTriggered={fetchAllData} />
+          <ApiSimulator onTrafficTriggered={fetchAllData} initialKey={simulatorKey} />
         )}
 
         {/* TAB 3: POLICIES & KEYS */}
         {activeTab === 'policies' && (
-          <PolicyManager onUpdate={fetchAllData} />
+          <PolicyManager onUpdate={fetchAllData} onTestKey={handleTestKeyInSimulator} />
         )}
 
         {/* TAB 4: AUDIT LOGS FULL VIEW */}

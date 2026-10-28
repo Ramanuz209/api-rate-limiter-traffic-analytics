@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Zap, CheckCircle2, XCircle, AlertTriangle, ArrowRight } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -40,10 +40,39 @@ const PRESET_KEYS = [
   }
 ];
 
-export default function ApiSimulator({ onTrafficTriggered }) {
-  const [selectedKeyObj, setSelectedKeyObj] = useState(PRESET_KEYS[3]); // default to strict burst
-  const [customKey, setCustomKey] = useState('');
-  const [useCustomKey, setUseCustomKey] = useState(false);
+export default function ApiSimulator({ onTrafficTriggered, initialKey }) {
+  const [selectedKeyObj, setSelectedKeyObj] = useState(() => {
+    if (initialKey) {
+      const match = PRESET_KEYS.find(k => k.key === initialKey);
+      if (match) return match;
+    }
+    return PRESET_KEYS[3];
+  });
+  const [customKey, setCustomKey] = useState(() => {
+    if (initialKey && !PRESET_KEYS.find(k => k.key === initialKey)) {
+      return initialKey;
+    }
+    return '';
+  });
+  const [useCustomKey, setUseCustomKey] = useState(() => {
+    if (initialKey && !PRESET_KEYS.find(k => k.key === initialKey)) {
+      return true;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (initialKey) {
+      const match = PRESET_KEYS.find(k => k.key === initialKey);
+      if (match) {
+        setSelectedKeyObj(match);
+        setUseCustomKey(false);
+      } else {
+        setCustomKey(initialKey);
+        setUseCustomKey(true);
+      }
+    }
+  }, [initialKey]);
   const [endpoint, setEndpoint] = useState('/api/v1/data');
   const [burstCount, setBurstCount] = useState(10);
   const [loading, setLoading] = useState(false);
